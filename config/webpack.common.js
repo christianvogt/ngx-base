@@ -9,24 +9,10 @@ var stringify = require('json-stringify');
 /**
  * Webpack Plugins
  */
-const autoprefixer = require('autoprefixer');
-const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
-const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
-// const CopyWebpackPlugin = require('copy-webpack-plugin');
-const DefinePlugin = require('webpack/lib/DefinePlugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const IgnorePlugin = require('webpack/lib/IgnorePlugin');
-const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
-const NormalModuleReplacementPlugin = require('webpack/lib/NormalModuleReplacementPlugin');
 const OptimizeJsPlugin = require('optimize-js-plugin');
-const ProvidePlugin = require('webpack/lib/ProvidePlugin');
-const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
-const UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
-const StyleLintPlugin = require('stylelint-webpack-plugin');
-// const TsConfigPathsPlugin = require('awesome-typescript-loader');
 
 /*
  * Webpack Constants
@@ -37,209 +23,89 @@ const METADATA = {
   FABRIC8_BRANDING: process.env.FABRIC8_BRANDING || 'fabric8'
 };
 
-// ExtractTextPlugin
-const extractCSS = new ExtractTextPlugin({
-  filename: '[name].[id].css',
-  allChunks: true
-});
-
 /*
  * Webpack configuration
  *
  * See: http://webpack.github.io/docs/configuration.html#cli
  */
-module.exports = function (options) {
-  console.log('The options from the webpack config: ' + stringify(options, null, 2));
+module.exports = {
 
-  var config = {
-    /*
-     * Cache generated modules and chunks to improve performance for multiple incremental builds.
-     * This is enabled by default in watch mode.
-     * You can pass false to disable it.
-     *
-     * See: http://webpack.github.io/docs/configuration.html#cache
-     */
-    //cache: false,
+  /*
+   * Cache generated modules and chunks to improve performance for multiple incremental builds.
+   * This is enabled by default in watch mode.
+   * You can pass false to disable it.
+   *
+   * See: http://webpack.github.io/docs/configuration.html#cache
+   */
+  //cache: false,
 
-    /*
-     * The entry point for the bundle
-     * Our Angular.js app
-     *
-     * See: https://webpack.js.org/configuration/entry-context/#entry
-     */
-    entry: helpers.root('index.ts'),
+  /*
+   * The entry point for the bundle
+   * Our Angular.js app
+   *
+   * See: https://webpack.js.org/configuration/entry-context/#entry
+   */
+  entry: helpers.root('index.ts'),
 
   devtool: 'inline-source-map',
 
-    /*
-     * Options affecting the resolving of modules.
-     *
-     * See: https://webpack.js.org/configuration/resolve
-     */
+  /*
+   * Options affecting the resolving of modules.
+   *
+   * See: https://webpack.js.org/configuration/resolve
+   */
   resolve: {
 
-      /**
-       * An array that automatically resolve certain extensions.
-       * Which is what enables users to leave off the extension when importing.
-       *
-       * See: https://webpack.js.org/configuration/resolve/#resolve-extensions
-       */
-      extensions: ['.ts', '.js', '.json'],
+    /**
+     * An array that automatically resolve certain extensions.
+     * Which is what enables users to leave off the extension when importing.
+     *
+     * See: https://webpack.js.org/configuration/resolve/#resolve-extensions
+     */
+    extensions: ['.ts', '.js', '.json'],
   },
 
-    /*
-     * Options affecting the normal modules.
-     *
-     * See: http://webpack.github.io/docs/configuration.html#module
-     */
+  /*
+   * Options affecting the normal modules.
+   *
+   * See: http://webpack.github.io/docs/configuration.html#module
+   */
   module: {
     rules: [
 
-        /*
-         * Typescript loader support for .ts and Angular 2 async routes via .async.ts
-         * Replace templateUrl and stylesUrl with require()
-         *
-         * See: https://github.com/s-panferov/awesome-typescript-loader
-         * See: https://github.com/TheLarkInn/angular2-template-loader
-         */
+      {
+        test: /\.ts$/,
+        enforce: 'pre',
+        use: 'tslint-loader',
+        exclude: [helpers.root('node_modules')]
+      },
       {
         test: /\.ts$/,
         use: [
-          {
-            loader: 'awesome-typescript-loader',
-            options: {
-              declaration: false
-            }
-          },
-          {
-            loader: 'angular2-template-loader'
-          }
+          'ts-loader',
+          'angular2-template-loader'
         ],
           exclude: [/\.(spec|e2e)\.ts$/]
       },
 
-        /*
-         * Json loader support for *.json files.
-         *
-         * See: https://github.com/webpack/json-loader
-         */
+      /*
+       * Json loader support for *.json files.
+       *
+       * See: https://github.com/webpack/json-loader
+       */
       {
         test: /\.json$/,
         use: ['json-loader']
       },
 
-        /* HTML Linter
-         * Checks all files against .htmlhintrc
-         */
-      {
-          enforce: 'pre',
-        test: /\.html$/,
-          loader: 'htmlhint-loader',
-          exclude: [/node_modules/],
-          options: {
-            configFile: './.htmlhintrc'
-          }
-        },
-
-        /* Raw loader support for *.html
-         * Returns file content as string
-         *
-         * See: https://github.com/webpack/raw-loader
-         */
-        {
-          test: /\.html$/,
-          use: ['html-loader']
-        },
-
-        /*
-         * to string and css loader support for *.css files
-         * Returns file content as string
-         *
-         */
-        {
-          test: /\.component\.css$/,
-          use: [
-            {
-              loader: 'to-string-loader'
-            }, {
-              loader: 'css-loader',
-              options: {
-                minimize: true,
-                sourceMap: true,
-                context: '/'
-              }
-            }
-          ],
-        },
-
-        {
-          test: /\.css$/,
-          loader: extractCSS.extract({
-            fallback: "style-loader",
-            use: "css-loader?sourceMap&context=/"
-          })
-        }, {
-          test: /\.component\.less$/,
-          use: [
-            {
-              loader: 'to-string-loader'
-            },
-            {
-              loader: 'css-loader',
-                options: {
-                  minimize: true,
-                  sourceMap: true,
-                  context: '/'
-                }
-            },
-            {
-                loader: 'less-loader',
-                options: {
-                  paths: [
-                    path.resolve(__dirname, "../node_modules/patternfly/src/less"),
-                    path.resolve(__dirname, "../node_modules/patternfly/node_modules")
-                  ],
-                  sourceMap: true
-                }
-            }],
-          },
-
-        /**
-         *  File loader for supporting fonts, for example, in CSS files.
-         */
-        {
-          test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
-          use: [
-            {
-              loader: 'url-loader',
-              query: {
-                limit: 3000,
-                name: 'assets/fonts/[name].[ext]'
-              }
-      }
     ]
   },
 
-        {
-          test: /\.jpg$|\.png$|\.svg$|\.gif$|\.jpeg$/,
-          use: [
-            {
-              loader: 'url-loader',
-              query: {
-                limit: 3000,
-                name: 'assets/fonts/[name].[ext]'
-              }
-            }
-          ]
-        }
-      ]
-    },
-
-    /*
-     * Add additional plugins to the compiler.
-     *
-     * See: http://webpack.github.io/docs/configuration.html#plugins
-     */
+  /*
+   * Add additional plugins to the compiler.
+   *
+   * See: http://webpack.github.io/docs/configuration.html#plugins
+   */
   plugins: [
     /**
      * Plugin: ContextReplacementPlugin
@@ -266,15 +132,6 @@ module.exports = function (options) {
     }),
 
     new HtmlWebpackPlugin(),
-
-    /**
-     * Plugin: ExtractTextPlugin
-     * Description: Extracts imported CSS files into external stylesheet
-     *
-     * See: https://github.com/webpack/extract-text-webpack-plugin
-     */
-    // new ExtractTextPlugin('[name].[contenthash].css'),
-    new ExtractTextPlugin('[name].css'),
 
     new webpack.LoaderOptionsPlugin({
       options: {
@@ -309,19 +166,7 @@ module.exports = function (options) {
       root: helpers.root(),
       verbose: false,
       dry: false
-      }),
-    extractCSS,
-      /*
-       * StyleLintPlugin
-       */
-      new StyleLintPlugin({
-        configFile: '.stylelintrc',
-        syntax: 'less',
-        context: 'src',
-        files: '**/*.less',
-        failOnError: true,
-        quiet: false,
-    })
+      })
     ],
 
     /**
@@ -338,7 +183,4 @@ module.exports = function (options) {
       clearImmediate: false,
       setImmediate: false
     }
-  };
-
-  return config;
 };

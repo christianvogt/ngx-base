@@ -5,6 +5,7 @@
 const helpers = require('./helpers');
 const path = require('path');
 const stringify = require('json-stringify');
+
 /**
  * Webpack Plugins
  */
@@ -13,13 +14,11 @@ const ProvidePlugin = require('webpack/lib/ProvidePlugin');
 const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
-// const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const StyleLintPlugin = require('stylelint-webpack-plugin');
 /**
  * Webpack Constants
  */
 const ENV = process.env.ENV = process.env.NODE_ENV = 'test';
-const API_URL = process.env.API_URL || (ENV==='inmemory'?'app/':'http://localhost:8080/api/');
+const API_URL = process.env.API_URL || (ENV === 'inmemory'?'app/':'http://localhost:8080/api/');
 const FABRIC8_WIT_API_URL = process.env.FABRIC8_WIT_API_URL;
 const FABRIC8_RECOMMENDER_API_URL = process.env.FABRIC8_RECOMMENDER_API_URL || 'http://api-bayesian.dev.rdu2c.fabric8.io/api/v1/';
 
@@ -105,15 +104,8 @@ module.exports = function (options) {
         {
           test: /\.ts$/,
           use: [
-            {
-              loader: "awesome-typescript-loader",
-              options: {
-                configFileName: 'tsconfig-test.json'
-              }
-            },
-            {
-              loader: "angular2-template-loader"
-            }
+            'ts-loader',
+            'angular2-template-loader'
           ],
           exclude: [/\.e2e\.ts$/]
         },
@@ -126,86 +118,6 @@ module.exports = function (options) {
         {
           test: /\.json$/,
           use: ['json-loader'],
-          exclude: [helpers.root('src/index.html')]
-        },
-
-        /*
-         * to string and css loader support for *.css files
-         * Returns file content as string
-         *
-         */
-        {
-          test: /\.css$/,
-          loaders: [
-            { loader: "to-string-loader" },
-            {
-              loader: "style-loader"
-            },
-            {
-              loader: "css-loader"
-            },
-          ],
-        },
-
-        {
-          test: /\.component\.less$/,
-          use: [
-            {
-              loader: 'to-string-loader'
-            }, {
-              loader: 'css-loader',
-              options: {
-                minimize: true,
-                sourceMap: true,
-                context: '/'
-              }
-            }, {
-              loader: 'less-loader',
-              options: {
-                paths: [
-                  path.resolve(__dirname, "../node_modules/patternfly/src/less"),
-                  path.resolve(__dirname, "../node_modules/patternfly/node_modules")
-                ],
-                sourceMap: true
-              }
-            }
-          ],
-        },
-
-        /* File loader for supporting fonts, for example, in CSS files.
-         */
-        {
-          test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
-          loaders: [
-            {
-              loader: "url-loader",
-              query: {
-                limit: 3000,
-                name: 'vendor/fonts/[name].[hash].[ext]'
-              }
-            }
-          ]
-        }, {
-          test: /\.jpg$|\.png$|\.gif$|\.jpeg$/,
-          loaders: [
-            {
-              loader: "url-loader",
-              query: {
-                limit: 3000,
-                name: 'vendor/images/[name].[hash].[ext]'
-              }
-            }
-          ]
-        },
-        /**
-         * Raw loader support for *.html
-         * Returns file content as string
-         *
-         * See: https://github.com/webpack/raw-loader
-         */
-        {
-          test: /\.html$/,
-          use: ['raw-loader'],
           exclude: [helpers.root('src/index.html')]
         },
 
@@ -294,17 +206,6 @@ module.exports = function (options) {
         }
         }
       }),
-      /*
-       * StyleLintPlugin
-       */
-      new StyleLintPlugin({
-        configFile: '.stylelintrc',
-        syntax: 'less',
-        context: 'src',
-        files: '**/*.less',
-        failOnError: true,
-        quiet: false,
-      })
     ],
 
     /**
