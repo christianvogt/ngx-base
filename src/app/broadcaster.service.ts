@@ -36,7 +36,9 @@ interface BroadcastEvent {
  *     }
  *
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class Broadcaster {
   private _eventBus: Subject<BroadcastEvent>;
   public static refCount: number = 0;
