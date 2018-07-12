@@ -63,8 +63,9 @@ fabric8-ui, you should:
 a library and then set up a watch task to rebuild any ts, html and scss files you
 change.  
 2. In the webapp into which you are embedding, run `npm link <path to ngx-base>/dist-watch --production`.
-This will create a symlink from `node_modules/ngx-base` to the `dist-watch` directory
-and install that symlinked node module into your webapp.
+This will create a symlink from `node_modules/ngx-base` to the `dist-watch` directory.
+3. Remove `node_modules/ngx-base`, change the version in package.json to 
+ `"ngx-base": "0.0.0-development"`and run `npm i`
 3. Run your webapp in development mode, making sure you have a watch on `node_modules/ngx-base`
 enabled. To do this using a typical Angular Webpack setup, such as the one based on Angular Class,
 just run `npm start. You will have access to both JS sourcemaps and SASS sourcemaps if your webapp
