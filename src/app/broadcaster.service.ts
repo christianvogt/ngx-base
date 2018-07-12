@@ -16,7 +16,7 @@ interface BroadcastEvent {
  *
  * Any events broadcast should be documented as part of the modules API.
  *
- * Example
+ * Examples
  * -------
  *
  * In this example we broadcast an event of type cheese and have the mouse
@@ -41,7 +41,7 @@ interface BroadcastEvent {
 })
 export class Broadcaster {
   private _eventBus: Subject<BroadcastEvent>;
-  public static refCount: number = 0;
+  public static refCount: number = 1;
 
   constructor() {
     this._eventBus = new Subject<BroadcastEvent>();
