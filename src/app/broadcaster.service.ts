@@ -16,7 +16,7 @@ interface BroadcastEvent {
  *
  * Any events broadcast should be documented as part of the modules API.
  *
- * Examples
+ * Example
  * -------
  *
  * In this example we broadcast an event of type cheese and have the mouse
