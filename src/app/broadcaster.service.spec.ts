@@ -11,7 +11,6 @@ describe('Service: Broadcaster service', () => {
 
   afterEach( () => {
     broadcaster = null;
-    Broadcaster.refCount = 0;
   });
 
   it('Broadcaster can successfully send and receive messages', (done) => {
